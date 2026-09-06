@@ -2,7 +2,9 @@ venv/
 ExDark/
 ExDark_Annno/
 __MACOSX/
-dataset/images/
-dataset/labels/people/
-dataset/labels/train/
-dataset/labels/val/
+
+dataset/
+runs/
+weights/
+
+*.pt
