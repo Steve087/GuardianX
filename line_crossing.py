@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 import cv2
+from event_manager import create_event
 
 
 # ============================================================
@@ -250,14 +251,21 @@ for result in results:
             .numpy()
         )
 
+        confidences = (
+            result.boxes.conf
+            .cpu()
+            .numpy()
+        )
+
 
         # ----------------------------------------------------
         # PROCESS EACH TRACK
         # ----------------------------------------------------
 
-        for track_id, box in zip(
+        for track_id, box, confidence in zip(
             track_ids,
-            boxes
+            boxes,
+            confidences
         ):
 
             x1, y1, x2, y2 = box
@@ -313,13 +321,16 @@ for result in results:
                         or frame_number - last_crossing > cooldown_frames
                     ):
 
-                        print(
-                            "Line Crossing:",
-                            track_id,
-                            "Direction: A -> B"
-                        )
+                        event = create_event(
+                        event_type="line_crossing",
+                        track_id=track_id,
+                        confidence=float(confidence),
+                        direction="A -> B"
+                    )
 
-                        crossing_cooldown[track_id] = frame_number
+                    print(event)
+
+                    crossing_cooldown[track_id] = frame_number
 
 
                 elif previous == -1 and current_side == 1:
@@ -329,11 +340,14 @@ for result in results:
                         or frame_number - last_crossing > cooldown_frames
                     ):
 
-                        print(
-                            "Line Crossing:",
-                            track_id,
-                            "Direction: B -> A"
-                        )
+                        event = create_event(
+                        event_type="line_crossing",
+                        track_id=track_id,
+                        confidence=float(confidence),
+                        direction="B-> A"
+                    )
+
+                        print(event)
 
                         crossing_cooldown[track_id] = frame_number
 
